@@ -97,55 +97,71 @@ Where:
 ---
 
 ## Program
-
-```python
-
-
-# -------------------------------------------------
-# Policy Evaluation Function
-# -------------------------------------------------
+```
+import gymnasium as gym
+import numpy as np
 
 
-# -------------------------------------------------
-# Display Output
-# -------------------------------------------------
+# Create FrozenLake environment
+env = gym.make("FrozenLake-v1", map_name="4x4", is_slippery=True)
 
-# Change the parameters and observe the results
+
+# Access the unwrapped environment to use the transition model
+env = env.unwrapped
+
+
+# Number of states and actions
+n_states = env.observation_space.n
+n_actions = env.action_space.n
+
+
+# Parameters
+gamma = 0.99
+theta = 1e-8
+
+
+# Random policy: each action has equal probability
+policy = np.ones((n_states, n_actions)) / n_actions
+V = np.zeros(n_states)
+
+
+def policy_evaluation(env, policy, gamma=0.99, theta=1e-8):
+  prev_V = np.zeros(len(policy))
+  iterations = 0
+  while True:
+    V = np.zeros(len(policy))
+    for s in range(len(policy)):
+      for action, action_prob in enumerate(policy[s]):
+        for prob, next_state, reward, done in env.P[s][action]:
+          V[s] += action_prob * prob * (reward + gamma * prev_V[next_state])
+    iterations += 1
+    if np.max(np.abs(V - prev_V)) < theta:
+      break
+    prev_V = V.copy()
+  return V, iterations
+
+
+V, iterations = policy_evaluation(env, policy, gamma, theta)
+
+print("Name: Yaswanth R       ")
+print("Register Number:212225040499    ")
+print("Number of iterations:", iterations)
+print("\nState-Value Function:")
+print(V)
+
+print("Name: Yaswanth R             ")
+print("Register Number: 212225040499   ")
+print("\nState-Value Function as 4x4 Grid:")
+print(np.round(V.reshape(4, 4), 4))
+env.close()
 
 ```
-
----
 
 ## Output
+<img width="647" height="362" alt="image" src="https://github.com/user-attachments/assets/4ee09957-2dcd-4ba2-9735-082f0ce4b09c" />
 
-```text
-
-Number of Iterations: 
-
-State-Value Function as 4x4 Grid:
-
-
-
-```
----
 
 ## Result
 
 Iterative policy evaluation was implemented successfully using the Gymnasium FrozenLake environment. The state-value function for the fixed random policy was estimated using the Bellman expectation equation.
-
----
-
-## Inference
-
-```text
-
-
-
-```
-
-
-
-
----
-
 
